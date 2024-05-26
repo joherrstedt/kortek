@@ -1,0 +1,118 @@
+const suits = ['hjärter', 'ruter', 'klöver', 'spader'];
+const values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'knekt', 'dam', 'kung', 'ess'];
+
+function createDeck() {
+    let deck = [];
+    for (let suit of suits) {
+        for (let value of values) {
+            deck.push(`${suit} ${value}`);
+        }
+    }
+    return deck;
+}
+
+let deck = createDeck();
+deck.forEach(card => console.log(card));
+
+function slumpa(from, to) {
+    return Math.floor(Math.random() * (to + 1 - from)) + from;
+}
+
+function drawCard(deck) {
+    let index = slumpa(0, deck.length - 1);
+    return deck.splice(index, 1)[0];
+}
+
+let firstCard = drawCard(deck);
+let secondCard = drawCard(deck);
+console.log(`Drog två spelkort: ${firstCard} och ${secondCard}`);
+
+function getCardValue(card) {
+    let value = card.split(' ')[1];
+    return values.indexOf(value);
+}
+
+function determineBestHand(card1, card2) {
+    let value1 = getCardValue(card1);
+    let value2 = getCardValue(card2);
+    if (value1 === value2) {
+        return 'Par';
+    }
+    return value1 > value2 ? card1 : card2;
+}
+
+let bestHand = determineBestHand(firstCard, secondCard);
+console.log(`Bästa poker-kombinationen är: ${bestHand}`);
+
+function drawNCards(deck, n) {
+    let hand = [];
+    for (let i = 0; i < n; i++) {
+        hand.push(drawCard(deck));
+    }
+    return hand;
+}
+
+function determineBestHandOfN(hand) {
+    let valueCounts = {};
+    hand.forEach(card => {
+        let value = getCardValue(card);
+        valueCounts[value] = (valueCounts[value] || 0) + 1;
+    });
+
+    let pairs = 0;
+    let highestValue = -1;
+    for (let value in valueCounts) {
+        if (valueCounts[value] >= 2) {
+            pairs++;
+        }
+        if (parseInt(value) > highestValue) {
+            highestValue = parseInt(value);
+        }
+    }
+
+    if (pairs > 0) {
+        return `Par med värde ${values[highestValue]}`;
+    } else {
+        return `Högsta kort är ${values[highestValue]}`;
+    }
+}
+
+let hand3 = drawNCards(deck, 3);
+console.log(`Drog tre spelkort: ${hand3.join(', ')}`);
+console.log(`Bästa poker-kombinationen är: ${determineBestHandOfN(hand3)}`);
+
+let hand4 = drawNCards(deck, 4);
+console.log(`Drog fyra spelkort: ${hand4.join(', ')}`);
+console.log(`Bästa poker-kombinationen är: ${determineBestHandOfN(hand4)}`);
+
+let hand5 = drawNCards(deck, 5);
+console.log(`Drog fem spelkort: ${hand5.join(', ')}`);
+console.log(`Bästa poker-kombinationen är: ${determineBestHandOfN(hand5)}`);
+
+function compareHands(hand1, hand2) {
+    let bestHand1 = determineBestHandOfN(hand1);
+    let bestHand2 = determineBestHandOfN(hand2);
+
+    console.log(`Hand 1: ${hand1.join(', ')}`);
+    console.log(`Hand 2: ${hand2.join(', ')}`);
+    console.log(`Bästa handen för Hand 1: ${bestHand1}`);
+    console.log(`Bästa handen för Hand 2: ${bestHand2}`);
+
+    if (bestHand1.includes('Par') && bestHand2.includes('Par')) {
+        let value1 = parseInt(bestHand1.split(' ')[2]);
+        let value2 = parseInt(bestHand2.split(' ')[2]);
+        return value1 > value2 ? 'Hand 1 vinner' : 'Hand 2 vinner';
+    } else if (bestHand1.includes('Par')) {
+        return 'Hand 1 vinner';
+    } else if (bestHand2.includes('Par')) {
+        return 'Hand 2 vinner';
+    } else {
+        let value1 = getCardValue(bestHand1.split(' ')[2]);
+        let value2 = getCardValue(bestHand2.split(' ')[2]);
+        return value1 > value2 ? 'Hand 1 vinner' : 'Hand 2 vinner';
+    }
+}
+
+let handA = drawNCards(deck, 5);
+let handB = drawNCards(deck, 5);
+console.log(compareHands(handA, handB));
